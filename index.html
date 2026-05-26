@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#0a0805;--paper:#f5f0e8;--accent:#c8a97e;--accent-deep:#a88355;
+  --warm:#e8d5b7;--charcoal:#141210;--charcoal-2:#1e1a15;
+  --muted:#6b6258;--muted-light:#9a8f83;
+  --border:rgba(200,169,126,.2);--border-strong:rgba(200,169,126,.4);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:'Cormorant Garamond',serif;overflow-x:hidden;cursor:none;min-height:100vh;}
+.gn-cursor{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .25s,height .25s;mix-blend-mode:multiply;}
+.gn-cursor-ring{position:fixed;width:38px;height:38px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:all .12s ease;opacity:.55;}
+/* LOADER */
+.gn-loader{position:fixed;inset:0;background:var(--charcoal);z-index:100000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;transition:opacity .6s ease,visibility .6s ease;}
+.gn-loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.gn-loader-brand{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,5rem);color:var(--paper);letter-spacing:.2em;overflow:hidden;}
+.gn-loader-brand span{display:inline-block;animation:slideUp .8s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(100%);}
+.gn-loader-brand span:nth-child(1){animation-delay:.1s;}
+.gn-loader-brand span:nth-child(2){animation-delay:.2s;}
+.gn-loader-brand span:nth-child(3){animation-delay:.3s;}
+.gn-loader-sub{font-family:'Space Mono',monospace;font-size:.52rem;color:var(--accent);letter-spacing:.45em;text-transform:uppercase;animation:fadeIn .6s ease .9s forwards;opacity:0;}
+.gn-loader-bar{width:180px;height:1px;background:rgba(200,169,126,.15);margin-top:.5rem;overflow:hidden;}
+.gn-loader-bar-fill{height:100%;background:var(--accent);animation:loadBar 1.8s ease forwards;}
+@keyframes slideUp{to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{to{opacity:1;}}
+@keyframes loadBar{from{width:0;}to{width:100%;}}
+/* NAV */
+.gn-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1.25rem 2.5rem;display:flex;justify-content:space-between;align-items:center;transition:background .4s,padding .3s;}
+.gn-nav.scrolled{background:rgba(245,240,232,.92);backdrop-filter:blur(12px);padding:.9rem 2.5rem;border-bottom:1px solid var(--border);}
+.gn-logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.15em;color:var(--ink);text-decoration:none;}
+.gn-logo span{color:var(--accent);}
+.gn-nav-links{display:flex;gap:2rem;list-style:none;}
+.gn-nav-mobile-toggle{display:none;background:none;border:none;color:var(--ink);font-size:1.5rem;cursor:pointer;z-index:1001;}
+@media(max-width:600px){
+  .gn-nav-mobile-toggle{display:block;}
+  .gn-nav-links{display:none;position:absolute;top:3.5rem;left:0;right:0;flex-direction:column;gap:1rem;background:var(--paper);padding:1.5rem;border-bottom:1px solid var(--border);z-index:999;}
+  .gn-nav-links.active{display:flex;}
+}
+.gn-nav-links a{font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink);text-decoration:none;opacity:.65;position:relative;transition:opacity .3s;}
+.gn-nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--accent);transform:scaleX(0);transition:transform .3s ease;}
+.gn-nav-links a:hover{opacity:1;}
+.gn-nav-links a:hover::after{transform:scaleX(1);}
+.gn-nav-admin-btn{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;background:transparent;color:var(--accent);border:1px solid var(--border-strong);padding:.45rem 1.1rem;cursor:none;transition:all .3s;}
+.gn-nav-admin-btn:hover{background:var(--accent);color:var(--charcoal);}
+/* HERO */
+.gn-hero{height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden;}
+.gn-hero-left{display:flex;flex-direction:column;justify-content:flex-end;padding:5rem 3rem 5rem 3rem;position:relative;z-index:2;}
+.gn-hero-eyebrow{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.55em;color:var(--accent);text-transform:uppercase;margin-bottom:1.5rem;}
+.gn-hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,8vw,8rem);line-height:.88;letter-spacing:.02em;color:var(--ink);margin-bottom:2rem;}
+.gn-hero-title em{display:block;color:var(--accent);font-style:normal;font-size:.42em;letter-spacing:.35em;}
+.gn-hero-desc{font-size:1.05rem;font-style:italic;color:var(--muted);max-width:290px;line-height:1.8;margin-bottom:3rem;font-weight:300;}
+.gn-hero-cta{display:inline-flex;align-items:center;gap:1rem;text-decoration:none;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--accent);padding-bottom:.5rem;transition:gap .3s ease;}
+.gn-hero-cta:hover{gap:1.8rem;}
+.gn-hero-cta .arr{color:var(--accent);}
+.gn-hero-right{position:relative;overflow:hidden;}
+.gn-hero-img{width:100%;height:100%;object-fit:cover;filter:grayscale(15%) contrast(1.05);transition:transform 8s ease;}
+.gn-hero-right:hover .gn-hero-img{transform:scale(1.04);}
+.gn-hero-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,169,126,.08) 0%,transparent 60%);}
+.gn-hero-number{position:absolute;bottom:1.5rem;right:1.5rem;font-family:'Bebas Neue',sans-serif;font-size:7rem;color:rgba(200,169,126,.1);letter-spacing:-.03em;line-height:1;pointer-events:none;}
+.gn-hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);z-index:3;}
+.gn-hero-scroll-line{width:1px;height:36px;background:var(--accent);opacity:.5;animation:scrollBob 2s ease-in-out infinite;}
+@keyframes scrollBob{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.6)}}
+/* ABOUT */
+.gn-about{padding:7rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.gn-section-label{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.5em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;}
+.gn-about-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,4.5vw,4.5rem);line-height:.9;letter-spacing:.02em;color:var(--ink);margin-bottom:2rem;}
+.gn-about-body{font-size:1.1rem;color:var(--muted);line-height:1.85;font-weight:300;font-style:italic;margin-bottom:1.25rem;}
+.gn-about-body-plain{font-size:.95rem;color:var(--muted-light);line-height:1.8;margin-bottom:3rem;}
+.gn-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;}
+.gn-stat{border-top:1px solid var(--border);padding-top:1.5rem;}
+.gn-stat-val{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--ink);letter-spacing:.02em;line-height:1;margin-bottom:.3rem;}
+.gn-stat-label{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);}
+.gn-about-right{position:relative;}
+.gn-about-img{width:100%;aspect-ratio:3/4;object-fit:cover;}
+.gn-about-img-accent{position:absolute;bottom:-1.5rem;right:-1.5rem;width:55%;aspect-ratio:1;border:2px solid var(--accent);pointer-events:none;}
+.gn-about-img-label{position:absolute;top:2rem;left:-2.5rem;writing-mode:vertical-lr;transform:rotate(180deg);font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);}
+/* PORTFOLIO */
+.gn-portfolio{padding:6rem 0;background:var(--charcoal);}
+.gn-portfolio-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;padding:0 3rem;}
+.gn-portfolio-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,4.5vw,4.5rem);color:var(--paper);letter-spacing:.02em;line-height:.9;}
+.gn-portfolio-title span{color:var(--accent);}
+.gn-portfolio-filters{display:flex;gap:.75rem;flex-wrap:wrap;}
+.gn-filter-btn{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.3em;text-transform:uppercase;background:none;color:rgba(245,240,232,.35);border:1px solid rgba(200,169,126,.12);padding:.45rem 1rem;cursor:none;transition:all .25s;}
+.gn-filter-btn:hover{color:var(--accent);border-color:var(--accent);}
+.gn-filter-btn.active{background:var(--accent);color:var(--charcoal);border-color:var(--accent);}
+.gn-portfolio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;}
+.gn-portfolio-item{position:relative;overflow:hidden;aspect-ratio:3/4;cursor:none;background:var(--charcoal-2);}
+.gn-portfolio-item.tall{grid-row:span 2;aspect-ratio:auto;}
+.gn-portfolio-img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.25,.46,.45,.94),filter .4s;filter:grayscale(15%);}
+.gn-portfolio-item:hover .gn-portfolio-img{transform:scale(1.08);filter:grayscale(0%);}
+.gn-portfolio-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,8,5,.85) 0%,rgba(10,8,5,.1) 50%,transparent 100%);opacity:0;transition:opacity .4s;display:flex;align-items:flex-end;padding:1.25rem;pointer-events:none;}
+.gn-portfolio-item:hover .gn-portfolio-overlay{opacity:1;}
+.gn-portfolio-cat{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem;}
+.gn-portfolio-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--paper);letter-spacing:.05em;}
+.gn-portfolio-num{position:absolute;top:.75rem;right:.75rem;font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.3em;color:rgba(245,240,232,.25);}
+/* LIGHTBOX */
+.gn-lightbox{position:fixed;inset:0;background:rgba(10,8,5,.96);z-index:50000;display:flex;align-items:center;justify-content:center;animation:fadeIn .3s ease;}
+.gn-lightbox-inner{max-width:85vw;max-height:85vh;position:relative;display:flex;gap:3rem;align-items:center;}
+.gn-lightbox-img{max-height:75vh;max-width:55vw;object-fit:contain;}
+.gn-lightbox-info{max-width:260px;}
+.gn-lightbox-cat{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
+.gn-lightbox-title{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--paper);letter-spacing:.05em;margin-bottom:1rem;}
+.gn-lightbox-desc{font-size:.95rem;color:var(--muted-light);line-height:1.8;font-style:italic;}
+.gn-lightbox-close{position:fixed;top:1.5rem;right:2rem;background:none;border:1px solid var(--border-strong);color:var(--paper);width:40px;height:40px;font-size:1.1rem;cursor:none;transition:all .25s;display:flex;align-items:center;justify-content:center;}
+.gn-lightbox-close:hover{background:var(--accent);color:var(--charcoal);}
+/* SERVICES */
+.gn-services{padding:7rem 3rem;}
+.gn-services-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4rem;}
+.gn-services-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,4.5vw,4.5rem);line-height:.9;color:var(--ink);}
+.gn-services-intro{max-width:360px;font-size:1rem;color:var(--muted);line-height:1.8;font-style:italic;font-weight:300;padding-top:1rem;}
+.gn-services-list{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);}
+.gn-service-item{background:var(--paper);padding:2rem 1.75rem;border:1px solid transparent;transition:all .35s;display:flex;flex-direction:column;gap:.65rem;}
+.gn-service-item:hover{border-color:var(--accent);background:var(--warm);transform:translateY(-3px);}
+.gn-service-num{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.3em;color:var(--accent);}
+.gn-service-icon{font-size:1.6rem;}
+.gn-service-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;}
+.gn-service-desc{font-size:.85rem;color:var(--muted);line-height:1.7;font-weight:300;}
+/* TESTIMONIALS */
+.gn-testimonials{padding:7rem 3rem;background:var(--charcoal);display:flex;align-items:center;justify-content:center;}
+.gn-testimonials-inner{max-width:760px;text-align:center;}
+.gn-quote-mark{font-family:'Cormorant Garamond',serif;font-size:7rem;line-height:1;color:var(--accent);opacity:.35;display:block;margin-bottom:-1rem;}
+.gn-testimonial-text{font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,2vw,1.85rem);font-style:italic;color:var(--paper);line-height:1.6;font-weight:300;margin-bottom:2rem;min-height:3.5em;transition:opacity .35s;}
+.gn-testimonial-author{font-family:'Space Mono',monospace;font-size:.48rem;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);transition:opacity .35s;}
+.gn-testimonial-dots{display:flex;gap:.75rem;justify-content:center;margin-top:2rem;}
+.gn-dot{width:24px;height:1px;background:rgba(200,169,126,.25);border:none;cursor:none;transition:all .3s;}
+.gn-dot.active{background:var(--accent);width:40px;}
+/* CONTACT */
+.gn-contact{display:grid;grid-template-columns:1fr 1fr;min-height:70vh;}
+.gn-contact-left{background:var(--charcoal-2);padding:5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.gn-contact-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,4.5vw,4.5rem);color:var(--paper);line-height:.9;letter-spacing:.02em;margin-bottom:2.5rem;}
+.gn-contact-title span{display:block;font-size:.35em;color:var(--accent);letter-spacing:.3em;margin-bottom:.5rem;}
+.gn-contact-line{border-bottom:1px solid rgba(200,169,126,.1);padding-bottom:1.1rem;margin-bottom:1.1rem;}
+.gn-contact-line-label{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:.3rem;}
+.gn-contact-line-val{font-size:.95rem;color:rgba(245,240,232,.7);}
+.gn-whatsapp-btn{display:inline-flex;align-items:center;gap:.75rem;background:#25D366;color:#fff;border:none;padding:.85rem 1.75rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;cursor:none;text-decoration:none;margin-top:1.5rem;transition:all .25s;width:fit-content;}
+.gn-whatsapp-btn:hover{background:#128C7E;transform:translateY(-2px);}
+.gn-contact-socials{display:flex;gap:1.25rem;margin-top:1.5rem;}
+.gn-contact-social{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted-light);text-decoration:none;transition:color .25s;}
+.gn-contact-social:hover{color:var(--accent);}
+.gn-contact-right{padding:5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.gn-form-group{margin-bottom:1.75rem;}
+.gn-form-label{display:block;font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
+.gn-form-input,.gn-form-textarea{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border-strong);color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:1rem;padding:.65rem 0;transition:border-color .25s;outline:none;}
+select.gn-form-input{background:transparent url('data:image/svg+xml;utf8,<svg fill="%230a0805" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right center;background-size:1.2rem;padding-right:1.8rem;appearance:none;}
+.gn-form-textarea{resize:vertical;min-height:90px;}
+.gn-form-input:focus,.gn-form-textarea:focus{border-bottom-color:var(--accent);}
+.gn-form-input::placeholder,.gn-form-textarea::placeholder{color:var(--muted-light);font-style:italic;}
+.gn-form-submit{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;background:var(--ink);color:var(--paper);border:none;padding:.9rem 2.25rem;cursor:none;transition:all .3s;}
+.gn-form-submit:hover{background:var(--accent);color:var(--charcoal);}
+.gn-form-submit:disabled{opacity:.5;}
+.gn-form-success{font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);padding:1rem 0;}
+/* FOOTER */
+.gn-footer{background:var(--charcoal);padding:2.5rem 3rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid var(--border);}
+.gn-footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.15em;color:var(--paper);}
+.gn-footer-logo span{color:var(--accent);}
+.gn-footer-copy{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.2em;color:var(--muted);text-align:center;}
+.gn-footer-social{display:flex;gap:1.5rem;justify-content:flex-end;}
+.gn-footer-social a{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .25s;}
+.gn-footer-social a:hover{color:var(--accent);}
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:.15s;}
+.reveal-d2{transition-delay:.3s;}
+/* ADMIN */
+.gn-admin{min-height:100vh;background:var(--charcoal);color:var(--paper);font-family:'Cormorant Garamond',serif;display:flex;}
+.gn-admin-sidebar{width:240px;min-height:100vh;background:rgba(0,0,0,.4);border-right:1px solid var(--border);padding:1.75rem 0;display:flex;flex-direction:column;flex-shrink:0;}
+.gn-admin-brand{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.15em;color:var(--paper);padding:0 1.5rem 1.75rem;border-bottom:1px solid var(--border);}
+.gn-admin-brand span{color:var(--accent);}
+.gn-admin-nav{padding:1.25rem 0;flex:1;}
+.gn-admin-nav-item{display:flex;align-items:center;gap:.65rem;padding:.75rem 1.5rem;cursor:none;transition:all .2s;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);border:none;background:none;width:100%;text-align:left;}
+.gn-admin-nav-item:hover{color:var(--paper);background:rgba(200,169,126,.06);}
+.gn-admin-nav-item.active{color:var(--accent);border-left:2px solid var(--accent);background:rgba(200,169,126,.08);}
+.gn-admin-logout{padding:1.25rem 1.5rem;border-top:1px solid var(--border);font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);background:none;border-left:none;border-right:none;border-bottom:none;cursor:none;width:100%;text-align:left;transition:color .2s;}
+.gn-admin-logout:hover{color:var(--accent);}
+.gn-admin-main{flex:1;padding:2.25rem 2.5rem;overflow-y:auto;}
+.gn-admin-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2.25rem;border-bottom:1px solid var(--border);padding-bottom:1.25rem;}
+.gn-admin-page-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.05em;color:var(--paper);}
+.gn-admin-time{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.25em;color:var(--muted);}
+.gn-admin-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2.5rem;}
+.gn-admin-card{background:rgba(200,169,126,.05);border:1px solid var(--border);padding:1.5rem;transition:border-color .25s;}
+.gn-admin-card:hover{border-color:var(--border-strong);}
+.gn-admin-card-label{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
+.gn-admin-card-val{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--paper);letter-spacing:.05em;line-height:1;}
+.gn-admin-card-val span{font-size:.4em;color:var(--accent);letter-spacing:.25em;}
+.gn-admin-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.05em;color:var(--paper);margin-bottom:1.25rem;}
+.gn-admin-table{width:100%;border-collapse:collapse;}
+.gn-admin-table th{text-align:left;font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);padding:.65rem .5rem;}
+.gn-admin-table td{border-bottom:1px solid rgba(200,169,126,.07);padding:.75rem .5rem;font-size:.88rem;color:rgba(245,240,232,.75);}
+.gn-admin-table tr:hover td{background:rgba(200,169,126,.04);}
+.gn-admin-badge{font-family:'Space Mono',monospace;font-size:.38rem;letter-spacing:.25em;text-transform:uppercase;padding:.2rem .6rem;}
+.portrait-badge{background:rgba(200,169,126,.15);color:var(--accent);}
+.wedding-badge{background:rgba(200,100,100,.1);color:#f08080;}
+.fashion-badge{background:rgba(100,150,200,.1);color:#80b4e0;}
+.editorial-badge{background:rgba(100,200,150,.1);color:#80e0b4;}
+.commercial-badge{background:rgba(180,180,100,.1);color:#d0d080;}
+.gn-admin-btn{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--border-strong);background:transparent;color:var(--accent);padding:.45rem 1.1rem;cursor:none;transition:all .25s;}
+.gn-admin-btn:hover{background:var(--accent);color:var(--charcoal);}
+.gn-admin-btn.danger{color:#ff6b6b;border-color:rgba(255,107,107,.3);}
+.gn-admin-btn.danger:hover{background:#ff6b6b;color:var(--charcoal);}
+.gn-upload-form{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem;}
+.gn-upload-label{display:block;font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);margin-bottom:.55rem;}
+.gn-upload-input,.gn-upload-select,.gn-upload-textarea{width:100%;background:rgba(200,169,126,.05);border:1px solid var(--border);color:var(--paper);font-family:'Cormorant Garamond',serif;font-size:.95rem;padding:.65rem .9rem;outline:none;transition:border-color .25s;}
+.gn-upload-input:focus,.gn-upload-select:focus,.gn-upload-textarea:focus{border-color:var(--accent);}
+.gn-upload-textarea{resize:vertical;min-height:75px;}
+.gn-upload-select option{background:var(--charcoal);}
+.gn-upload-dropzone{border:1px dashed var(--border-strong);padding:2.5rem;text-align:center;grid-column:1/-1;cursor:none;transition:all .25s;background:rgba(200,169,126,.02);}
+.gn-upload-dropzone:hover{border-color:var(--accent);background:rgba(200,169,126,.05);}
+.gn-upload-dropzone-text{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);}
+.gn-portfolio-manage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1.25rem;}
+.gn-manage-item{background:rgba(200,169,126,.05);border:1px solid var(--border);overflow:hidden;}
+.gn-manage-img{width:100%;aspect-ratio:3/4;object-fit:cover;opacity:.8;}
+.gn-manage-info{padding:.85rem;}
+.gn-manage-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.05em;margin-bottom:.25rem;}
+.gn-manage-actions{display:flex;gap:.5rem;margin-top:.65rem;}
+.gn-message-card{border:1px solid var(--border);padding:1.35rem;margin-bottom:.85rem;transition:border-color .25s;}
+.gn-message-card:hover{border-color:var(--border-strong);}
+.gn-message-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.65rem;}
+.gn-message-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.05em;color:var(--paper);}
+.gn-message-date{font-family:'Space Mono',monospace;font-size:.4rem;letter-spacing:.25em;color:var(--muted);}
+.gn-message-email{font-family:'Space Mono',monospace;font-size:.4rem;letter-spacing:.2em;color:var(--accent);margin-bottom:.4rem;}
+.gn-message-service{font-family:'Space Mono',monospace;font-size:.4rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
+.gn-message-body{font-size:.9rem;color:rgba(245,240,232,.6);line-height:1.7;font-style:italic;}
+.gn-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem;}
+.gn-settings-section{border:1px solid var(--border);padding:1.75rem;}
+.gn-settings-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.05em;color:var(--accent);margin-bottom:1.35rem;}
+.gn-login{min-height:100vh;background:var(--charcoal);display:flex;align-items:center;justify-content:center;}
+.gn-login-box{width:400px;padding:3rem;border:1px solid var(--border);background:rgba(0,0,0,.3);}
+.gn-login-brand{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.15em;color:var(--paper);margin-bottom:.4rem;}
+.gn-login-brand span{color:var(--accent);}
+.gn-login-sub{font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);margin-bottom:2.25rem;}
+.gn-login-err{font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.2em;color:#ff6b6b;margin-bottom:.85rem;}
+.gn-search-wrap{display:flex;gap:.85rem;margin-bottom:1.75rem;}
+.gn-search-input{flex:1;background:rgba(200,169,126,.05);border:1px solid var(--border);color:var(--paper);font-family:'Cormorant Garamond',serif;font-size:.95rem;padding:.6rem .9rem;outline:none;transition:border-color .25s;}
+.gn-search-input:focus{border-color:var(--accent);}
+.gn-search-input::placeholder{color:var(--muted);font-style:italic;}
+@media(max-width:900px){
+  .gn-hero{grid-template-columns:1fr;}.gn-hero-right{display:none;}.gn-hero-left{padding:5.5rem 1.5rem 4rem;}
+  .gn-about{grid-template-columns:1fr;padding:4rem 1.5rem;gap:2.5rem;}.gn-about-img-label,.gn-about-img-accent{display:none;}
+  .gn-portfolio{padding:4rem 0;}.gn-portfolio-header{flex-direction:column;gap:1.5rem;padding:0 1.5rem;}.gn-portfolio-grid{grid-template-columns:1fr 1fr;}
+  .gn-services{padding:4rem 1.5rem;}.gn-services-header{flex-direction:column;gap:1.5rem;}.gn-services-list{grid-template-columns:1fr 1fr;}
+  .gn-testimonials{padding:4rem 1.5rem;}
+  .gn-contact{grid-template-columns:1fr;}.gn-contact-left,.gn-contact-right{padding:3.5rem 1.5rem;}
+  .gn-footer{grid-template-columns:1fr;gap:1.25rem;text-align:center;padding:2rem 1.5rem;}.gn-footer-social{justify-content:center;}
+  .gn-lightbox-inner{flex-direction:column;}.gn-lightbox-img{max-width:90vw;max-height:45vh;}.gn-lightbox-info{max-width:90vw;}
+  .gn-admin{flex-direction:column;}.gn-admin-sidebar{width:100%;min-height:unset;}.gn-admin-cards{grid-template-columns:1fr;}.gn-upload-form{grid-template-columns:1fr;}.gn-settings-grid{grid-template-columns:1fr;}
+  .gn-nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="cursor" class="gn-cursor"></div>
+<div id="ring" class="gn-cursor-ring"></div>
+<div id="loader" class="gn-loader">
+  <div class="gn-loader-brand"><span>GNATION</span><span>&nbsp;</span><span>CREATIVES</span></div>
+  <div class="gn-loader-sub">Photography · Design · Vision</div>
+  <div class="gn-loader-bar"><div class="gn-loader-bar-fill"></div></div>
+</div>
+<div id="app"></div>
+
+<script>
+const PORTFOLIO=[
+  {id:"1",title:"Golden Hour",cat:"Portrait",desc:"A study in warmth and stillness.",img:"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80"},
+  {id:"2",title:"Veil & Light",cat:"Wedding",desc:"Where two lives become one story.",img:"https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80"},
+  {id:"3",title:"Silhouette No. 7",cat:"Fashion",desc:"The body as architecture.",img:"https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80"},
+  {id:"4",title:"Ember & Ash",cat:"Editorial",desc:"Destruction as beauty.",img:"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80"},
+  {id:"5",title:"Neema Brands",cat:"Commercial",desc:"Visual authority for modern markets.",img:"https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80"},
+  {id:"6",title:"Midnight Study",cat:"Portrait",desc:"The quiet hour of deep focus.",img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80"},
+  {id:"7",title:"Ceremony I",cat:"Wedding",desc:"Tears, laughter, forever.",img:"https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80"},
+  {id:"8",title:"Runway Raw",cat:"Fashion",desc:"Unfiltered, uncompromising style.",img:"https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80"},
+];
+const TESTIMONIALS=[
+  {text:"GNation didn't just photograph our wedding — they painted it. Every image feels like a scene from a film we never knew we were living.",author:"Amara & Kelvin",loc:"Dar es Salaam, 2024"},
+  {text:"Working with GNation was unlike any creative collaboration I've had. They have this rare gift of making the camera disappear and the soul appear.",author:"Fatima Njoroge",loc:"Nairobi, 2023"},
+  {text:"Our campaign visuals quadrupled engagement on launch day. GNation understands not just photography but visual storytelling for modern audiences.",author:"Neema Brands",loc:"Commercial Client, 2025"},
+];
+const MESSAGES=[
+  {id:"1",name:"Amara Osei",email:"amara@email.com",service:"Wedding",msg:"We loved working with you! Can we book for our anniversary shoot?",date:"2026-05-20"},
+  {id:"2",name:"Fatima Njoroge",email:"fatima@models.co",service:"Fashion",msg:"Interested in a 3-day fashion editorial collaboration for our new collection.",date:"2026-05-18"},
+  {id:"3",name:"Kelvin Mwangi",email:"kelvin@studio.tz",service:"Commercial",msg:"We need product photography for our rebrand campaign launching July.",date:"2026-05-15"},
+];
+let state={view:"site",adminUser:null,portfolio:[...PORTFOLIO],messages:[...MESSAGES],filterCat:"All",tIdx:0,lightbox:null,mobileMenuOpen:false,uploadForm:{title:"",cat:"Portrait",desc:"",img:""},uploadSuccess:false,formData:{name:"",email:"",service:"",msg:""},formSent:false,adminPage:"dashboard",loginEmail:"",loginPass:"",loginErr:"",searchQ:"",settings:{siteName:"GNATION CREATIVES",tagline:"Photography · Design · Vision",email:"hello@gnationcreatives.com",phone:"+255 616 849 633",loc:"Dar es Salaam, Tanzania",instagram:"https://instagram.com/gnation_creatives",tiktok:"https://www.tiktok.com/@gnation",facebook:"https://facebook.com/gnationcreatives",youtube:"https://youtube.com/@gnationcreatives"}};
+function render(){
+  const app=document.getElementById("app");
+  if(state.view==="site") app.innerHTML=renderSite();
+  else if(state.view==="login") app.innerHTML=renderLogin();
+  else if(state.view==="admin") app.innerHTML=renderAdmin();
+  bindEvents();
+  initReveal();
+}
+function renderSite(){return`
+<nav class="gn-nav" id="gnav">
+  <a href="#" class="gn-logo" onclick="return false">GNATION<span>.</span></a>
+  <button class="gn-nav-mobile-toggle" onclick="state.mobileMenuOpen=!state.mobileMenuOpen;render()">☰</button>
+  <ul class="gn-nav-links" id="gnav-menu">
+    <li><a href="#about" onclick="scrollToSection('about');state.mobileMenuOpen=false;render()">About</a></li>
+    <li><a href="#portfolio" onclick="scrollToSection('portfolio');state.mobileMenuOpen=false;render()">Work</a></li>
+    <li><a href="#services" onclick="scrollToSection('services');state.mobileMenuOpen=false;render()">Services</a></li>
+    <li><a href="#contact" onclick="scrollToSection('contact');state.mobileMenuOpen=false;render()">Contact</a></li>
+  </ul>
+  <button class="gn-nav-admin-btn" onclick="goAdmin()">Admin</button>
+</nav>
+${renderHero()}${renderAbout()}${renderPortfolio()}${renderServices()}${renderTestimonials()}${renderContact()}${renderFooter()}
+${state.lightbox?renderLightbox():""}
+`;}
+function renderHero(){return`
+<section class="gn-hero">
+  <div class="gn-hero-left">
+    <div class="gn-hero-eyebrow">Est. 2026 · Dar es Salaam</div>
+    <h1 class="gn-hero-title"><em>Visual</em>STORY<br>TELLERS</h1>
+    <p class="gn-hero-desc">We craft images that outlive the moment. Cinematic photography and creative direction for those who understand that beauty is a language.</p>
+    <a href="#portfolio" class="gn-hero-cta" onclick="scrollToSection('portfolio');return false;">View Portfolio <span class="arr">→</span></a>
+  </div>
+  <div class="gn-hero-right">
+    <img class="gn-hero-img" src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=900&q=85" alt="hero">
+    <div class="gn-hero-overlay"></div>
+    <div class="gn-hero-number">001</div>
+  </div>
+  <div class="gn-hero-scroll"><div class="gn-hero-scroll-line"></div><span>Scroll</span></div>
+</section>`;}
+function renderAbout(){return`
+<section id="about" class="gn-about">
+  <div>
+    <div class="gn-section-label reveal">Our Story</div>
+    <h2 class="gn-about-title reveal reveal-d1">WE MAKE<br>THE INVISIBLE<br>VISIBLE</h2>
+    <p class="gn-about-body reveal reveal-d2">GNATION CREATIVES was founded on one belief: every person, brand, and moment carries a story worth telling beautifully.</p>
+    <p class="gn-about-body-plain reveal">Based in Dar es Salaam, we are a collective of photographers, directors, and designers working at the intersection of fine art and commercial storytelling. Our lens is cinematic. Our process is deeply collaborative. Our obsession is light.<br><br>From intimate portrait sessions to large-scale brand campaigns, we approach every project with the same editorial rigor — treating each frame as a statement.</p>
+    <div class="gn-stats reveal">
+      <div class="gn-stat"><div class="gn-stat-val">8+</div><div class="gn-stat-label">Years Experience</div></div>
+      <div class="gn-stat"><div class="gn-stat-val">340+</div><div class="gn-stat-label">Projects Completed</div></div>
+      <div class="gn-stat"><div class="gn-stat-val">280+</div><div class="gn-stat-label">Happy Clients</div></div>
+    </div>
+  </div>
+  <div class="gn-about-right reveal">
+    <div class="gn-about-img-label">GNATION CREATIVES · 2026</div>
+    <div style="position:relative"><img class="gn-about-img" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80" alt="about"><div class="gn-about-img-accent"></div></div>
+  </div>
+</section>`;}
+function renderPortfolio(){
+  const cats=["All","Portrait","Wedding","Fashion","Editorial","Commercial"];
+  const filtered=state.filterCat==="All"?state.portfolio:state.portfolio.filter(p=>p.cat===state.filterCat);
+  return`<section id="portfolio" class="gn-portfolio">
+  <div class="gn-portfolio-header reveal">
+    <div><div class="gn-section-label" style="color:rgba(200,169,126,.6)">Selected Work</div><h2 class="gn-portfolio-title">OUR <span>PORT</span>FOLIO</h2></div>
+    <div class="gn-portfolio-filters">${cats.map(c=>`<button class="gn-filter-btn${state.filterCat===c?" active":""}" onclick="filterCat('${c}')">${c}</button>`).join("")}</div>
+  </div>
+  <div class="gn-portfolio-grid">
+    ${filtered.map((p,i)=>`<div class="gn-portfolio-item${i%5===0?" tall":""}" onclick="openLightbox('${p.id}')">
+      <img class="gn-portfolio-img" src="${p.img}" alt="${p.title}" loading="lazy">
+      <div class="gn-portfolio-overlay"><div class="gn-portfolio-info"><div class="gn-portfolio-cat">${p.cat}</div><div class="gn-portfolio-name">${p.title}</div></div></div>
+      <div class="gn-portfolio-num">0${i+1}</div>
+    </div>`).join("")}
+  </div>
+</section>`;}
+function renderServices(){
+  const svcs=[
+    {n:"01",name:"Photography",icon:"📷",desc:"From intimate portraits to expansive editorial campaigns. Every session is a conversation between light, person, and purpose."},
+    {n:"02",name:"Videography",icon:"🎬",desc:"Cinematic storytelling that moves. Wedding films, brand documentaries, and creative short-form content."},
+    {n:"03",name:"Graphic Design",icon:"✏️",desc:"Visual identity systems, print collateral, and digital assets crafted with editorial precision."},
+    {n:"04",name:"Branding",icon:"◈",desc:"Complete brand ecosystems built from concept to execution. Strategy, identity, and visual language."},
+    {n:"05",name:"Event Coverage",icon:"◎",desc:"Full-day documentary coverage of corporate events, product launches, galas, and cultural gatherings."},
+  ];
+  return`<section id="services" class="gn-services">
+  <div class="gn-services-header">
+    <div><div class="gn-section-label reveal">What We Offer</div><h2 class="gn-services-title reveal reveal-d1">OUR<br>CRAFT</h2></div>
+    <p class="gn-services-intro reveal">From a single portrait session to a full production, we tailor every engagement to the depth your vision deserves.</p>
+  </div>
+  <div class="gn-services-list">
+    ${svcs.map((s,i)=>`<div class="gn-service-item reveal" style="transition-delay:${i*.1}s">
+      <div class="gn-service-num">${s.n}</div>
+      <div class="gn-service-icon">${s.icon}</div>
+      <div class="gn-service-name">${s.name}</div>
+      <p class="gn-service-desc">${s.desc}</p>
+    </div>`).join("")}
+  </div>
+</section>`;}
+function renderTestimonials(){
+  const t=TESTIMONIALS[state.tIdx];
+  return`<section id="testimonials" class="gn-testimonials">
+  <div class="gn-testimonials-inner reveal">
+    <span class="gn-quote-mark">"</span>
+    <div id="ttext" class="gn-testimonial-text">${t.text}</div>
+    <div id="tauthor" class="gn-testimonial-author">${t.author} — ${t.loc}</div>
+    <div class="gn-testimonial-dots">${TESTIMONIALS.map((_,i)=>`<button class="gn-dot${state.tIdx===i?" active":""}" onclick="switchT(${i})"></button>`).join("")}</div>
+  </div>
+</section>`;}
+function renderContact(){return`
+<section id="contact" class="gn-contact">
+  <div class="gn-contact-left reveal">
+    <div class="gn-section-label" style="color:var(--accent)">Get In Touch</div>
+    <h2 class="gn-contact-title"><span>Let's Create</span>SOMETHING<br>UNFORGETTABLE</h2>
+    <div>
+      ${[["Email","hello@gnationcreatives.com"],["Phone","+255 616 849 633"],["Based In","Dar es Salaam, Tanzania"],["Available For","Local & International Projects"]].map(([l,v])=>`<div class="gn-contact-line"><span class="gn-contact-line-label">${l}</span><span class="gn-contact-line-val">${v}</span></div>`).join("")}
+    </div>
+    <a href="https://wa.me/255616849633" class="gn-whatsapp-btn" target="_blank">💬 WhatsApp Us</a>
+    <div class="gn-contact-socials">${[["Instagram",state.settings.instagram],["TikTok",state.settings.tiktok],["Facebook",state.settings.facebook],["YouTube",state.settings.youtube]].map(([s,url])=>`<a href="${url}" target="_blank" rel="noopener" class="gn-contact-social">${s}</a>`).join("")}</div>
+  </div>
+  <div class="gn-contact-right reveal">
+    <div class="gn-section-label">Book a Session</div>
+    ${state.formSent?`<div class="gn-form-success">✦ Message received. We'll be in touch within 24 hours.</div>`:`
+    <div class="gn-form-group"><label class="gn-form-label">Your Name</label><input class="gn-form-input" placeholder="Full name" value="${state.formData.name}" oninput="setForm('name',this.value)"></div>
+    <div class="gn-form-group"><label class="gn-form-label">Email Address</label><input type="email" class="gn-form-input" placeholder="your@email.com" value="${state.formData.email}" oninput="setForm('email',this.value)"></div>
+    <div class="gn-form-group"><label class="gn-form-label">Service Interest</label><select class="gn-form-input" onchange="setForm('service',this.value)" style="cursor:pointer"><option value="">Select a service...</option><option ${state.formData.service==="Photography"?"selected":""}>Photography</option><option ${state.formData.service==="Videography"?"selected":""}>Videography</option><option ${state.formData.service==="Graphic Design"?"selected":""}>Graphic Design</option><option ${state.formData.service==="Branding"?"selected":""}>Branding</option><option ${state.formData.service==="Event Coverage"?"selected":""}>Event Coverage</option></select></div>
+    <div class="gn-form-group"><label class="gn-form-label">Tell Us Your Vision</label><textarea class="gn-form-textarea" placeholder="Describe what you have in mind..." oninput="setForm('msg',this.value)">${state.formData.msg}</textarea></div>
+    <button class="gn-form-submit" onclick="submitForm()">Send Enquiry →</button>`}
+  </div>
+</section>`;}
+function renderFooter(){return`
+<footer class="gn-footer">
+  <div class="gn-footer-logo">GNATION<span>.</span>CREATIVES</div>
+  <div class="gn-footer-copy">© 2026 GNation Creatives · All rights reserved · Dar es Salaam, Tanzania</div>
+  <div class="gn-footer-social">${[["Instagram",state.settings.instagram],["TikTok",state.settings.tiktok],["WhatsApp","https://wa.me/255616849633"],["YouTube",state.settings.youtube]].map(([s,url])=>`<a href="${url}" target="_blank" rel="noopener">${s}</a>`).join("")}</div>
+</footer>`;}
+function renderLightbox(){
+  const p=state.portfolio.find(x=>x.id===state.lightbox);
+  if(!p)return"";
+  return`<div class="gn-lightbox" onclick="closeLightboxBg(event)">
+  <div class="gn-lightbox-inner">
+    <img class="gn-lightbox-img" src="${p.img.replace('w=600','w=1000')}" alt="${p.title}">
+    <div class="gn-lightbox-info">
+      <div class="gn-lightbox-cat">${p.cat}</div>
+      <div class="gn-lightbox-title">${p.title}</div>
+      <div class="gn-lightbox-desc">${p.desc}</div>
+    </div>
+  </div>
+  <button class="gn-lightbox-close" onclick="closeLightbox()">✕</button>
+</div>`;}
+function renderLogin(){return`
+<div class="gn-login">
+  <div class="gn-login-box">
+    <div class="gn-login-brand">GNATION<span>.</span>ADMIN</div>
+    <div class="gn-login-sub">Secure Dashboard Access</div>
+    ${state.loginErr?`<div class="gn-login-err">${state.loginErr}</div>`:""}
+    <div class="gn-form-group"><label class="gn-upload-label">Email</label><input type="email" class="gn-upload-input" value="${state.loginEmail}" oninput="state.loginEmail=this.value" onkeydown="if(event.key==='Enter')doLogin()" placeholder="admin@gnation.com"></div>
+    <div class="gn-form-group" style="margin-top:1.25rem"><label class="gn-upload-label">Password</label><input type="password" class="gn-upload-input" value="${state.loginPass}" oninput="state.loginPass=this.value" onkeydown="if(event.key==='Enter')doLogin()" placeholder="gnation2026"></div>
+    <button class="gn-form-submit" style="margin-top:1.75rem;width:100%" onclick="doLogin()">Enter Dashboard →</button>
+    <button style="margin-top:.85rem;background:none;border:none;font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);cursor:none;width:100%;text-align:center" onclick="state.view='site';render()">← Back to Site</button>
+    <div style="margin-top:1.5rem;font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.2em;color:rgba(107,98,88,.6);text-align:center">Demo: admin@gnation.com / gnation2026</div>
+  </div>
+</div>`;}
+function renderAdmin(){
+  const pages=[
+    {id:"dashboard",label:"Dashboard",icon:"◉"},
+    {id:"upload",label:"Upload Project",icon:"↑"},
+    {id:"portfolio",label:"Manage Portfolio",icon:"◫"},
+    {id:"messages",label:"Client Messages",icon:"✉"},
+    {id:"settings",label:"Settings",icon:"⊙"},
+  ];
+  return`<div class="gn-admin">
+  <aside class="gn-admin-sidebar">
+    <div class="gn-admin-brand">GNATION<span>.</span><br><span style="font-size:.65rem;letter-spacing:.2em;color:var(--muted)">ADMIN PANEL</span></div>
+    <nav class="gn-admin-nav">
+      ${pages.map(p=>`<button class="gn-admin-nav-item${state.adminPage===p.id?" active":""}" onclick="state.adminPage='${p.id}';render()"><span style="font-size:.9rem">${p.icon}</span> ${p.label}</button>`).join("")}
+    </nav>
+    <button class="gn-admin-logout" onclick="state.view='site';render()">← Back to Site</button>
+    <button class="gn-admin-logout" style="color:#ff6b6b" onclick="state.adminUser=null;state.view='site';render()">Logout</button>
+  </aside>
+  <main class="gn-admin-main">
+    <div class="gn-admin-topbar">
+      <div class="gn-admin-page-title">${pages.find(p=>p.id===state.adminPage)?.label}</div>
+      <div class="gn-admin-time">Welcome back · ${new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}</div>
+    </div>
+    ${renderAdminPage()}
+  </main>
+</div>`;}
+function renderAdminPage(){
+  if(state.adminPage==="dashboard") return renderAdminDash();
+  if(state.adminPage==="upload") return renderAdminUpload();
+  if(state.adminPage==="portfolio") return renderAdminPortfolio();
+  if(state.adminPage==="messages") return renderAdminMessages();
+  if(state.adminPage==="settings") return renderAdminSettings();
+  return "";
+}
+function renderAdminDash(){return`
+  <div class="gn-admin-cards">
+    <div class="gn-admin-card"><div class="gn-admin-card-label">Total Projects</div><div class="gn-admin-card-val">${state.portfolio.length}</div></div>
+    <div class="gn-admin-card"><div class="gn-admin-card-label">Client Messages</div><div class="gn-admin-card-val">${state.messages.length}</div></div>
+    <div class="gn-admin-card"><div class="gn-admin-card-label">Categories Active</div><div class="gn-admin-card-val">5 <span>DISTINCT</span></div></div>
+  </div>
+  <div class="gn-admin-section-title">Recent Uploads</div>
+  <table class="gn-admin-table"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${state.portfolio.slice(0,5).map(p=>`<tr><td>${p.title}</td><td><span class="gn-admin-badge ${p.cat.toLowerCase()}-badge">${p.cat}</span></td><td>${p.date||"2026"}</td><td><button class="gn-admin-btn" onclick="state.adminPage='portfolio';render()">View</button></td></tr>`).join("")}
+  </tbody></table>
+  <div style="margin-top:2.25rem"><div class="gn-admin-section-title">Recent Messages</div>
+    ${state.messages.slice(0,2).map(m=>`<div class="gn-message-card"><div class="gn-message-header"><div class="gn-message-name">${m.name}</div><div class="gn-message-date">${m.date}</div></div><div class="gn-message-body">${m.msg.slice(0,110)}...</div></div>`).join("")}
+  </div>`;}
+function renderAdminUpload(){return`
+  ${state.uploadSuccess?`<div style="font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.3em;color:var(--accent);margin-bottom:1.5rem">✦ Project uploaded successfully.</div>`:""}
+  <div class="gn-upload-form">
+    <div><label class="gn-upload-label">Project Title *</label><input class="gn-upload-input" value="${state.uploadForm.title}" oninput="state.uploadForm.title=this.value" placeholder="e.g. Golden Hour Session"></div>
+    <div><label class="gn-upload-label">Category *</label><select class="gn-upload-select" onchange="state.uploadForm.cat=this.value"><option ${state.uploadForm.cat==="Portrait"?"selected":""}>Portrait</option><option ${state.uploadForm.cat==="Wedding"?"selected":""}>Wedding</option><option ${state.uploadForm.cat==="Fashion"?"selected":""}>Fashion</option><option ${state.uploadForm.cat==="Editorial"?"selected":""}>Editorial</option><option ${state.uploadForm.cat==="Commercial"?"selected":""}>Commercial</option></select></div>
+    <div style="grid-column:1/-1"><label class="gn-upload-label">Image URL *</label><input class="gn-upload-input" value="${state.uploadForm.img}" oninput="state.uploadForm.img=this.value" placeholder="https://images.unsplash.com/..."></div>
+    <div style="grid-column:1/-1"><label class="gn-upload-label">Description</label><textarea class="gn-upload-textarea" oninput="state.uploadForm.desc=this.value" placeholder="Brief description...">${state.uploadForm.desc}</textarea></div>
+    <div class="gn-upload-dropzone" style="grid-column:1/-1">
+      <div style="font-size:2rem;margin-bottom:.65rem;opacity:.4">⬆</div>
+      <div class="gn-upload-dropzone-text">Drag & drop image/video here · or click to browse<br><span style="opacity:.5">Firebase Storage ready · Max 50MB</span></div>
+    </div>
+    <div style="grid-column:1/-1;display:flex;gap:1rem">
+      <button class="gn-admin-btn" onclick="doUpload()">Upload Project →</button>
+      <button class="gn-admin-btn" style="opacity:.5" onclick="state.uploadForm={title:'',cat:'Portrait',desc:'',img:''};render()">Clear</button>
+    </div>
+  </div>`;}
+function renderAdminPortfolio(){
+  const filtered=state.searchQ?state.portfolio.filter(p=>p.title.toLowerCase().includes(state.searchQ.toLowerCase())||p.cat.toLowerCase().includes(state.searchQ.toLowerCase())):state.portfolio;
+  return`
+  <div class="gn-search-wrap">
+    <input class="gn-search-input" placeholder="Search by title or category..." value="${state.searchQ}" oninput="state.searchQ=this.value;render()">
+    <button class="gn-admin-btn" onclick="state.adminPage='upload';render()">+ Add New</button>
+  </div>
+  <div class="gn-portfolio-manage-grid">
+    ${filtered.map(p=>`<div class="gn-manage-item"><img class="gn-manage-img" src="${p.img}" alt="${p.title}" loading="lazy"><div class="gn-manage-info"><div class="gn-manage-name">${p.title}</div><span class="gn-admin-badge ${p.cat.toLowerCase()}-badge">${p.cat}</span><div class="gn-manage-actions"><button class="gn-admin-btn" style="font-size:.38rem">Edit</button><button class="gn-admin-btn danger" style="font-size:.38rem" onclick="deleteItem('${p.id}')">Delete</button></div></div></div>`).join("")}
+  </div>`;}
+function renderAdminMessages(){return`
+  <div style="font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.3em;color:var(--muted);margin-bottom:1.5rem">${state.messages.length} total enquiries</div>
+  ${state.messages.map(m=>`<div class="gn-message-card"><div class="gn-message-header"><div class="gn-message-name">${m.name}</div><div class="gn-message-date">${m.date}</div></div><div class="gn-message-email">${m.email}</div><div class="gn-message-service">Service: ${m.service}</div><div class="gn-message-body">${m.msg}</div><div style="margin-top:.85rem;display:flex;gap:.65rem"><a href="mailto:${m.email}" class="gn-admin-btn" style="text-decoration:none;font-size:.38rem">Reply by Email</a><button class="gn-admin-btn danger" style="font-size:.38rem">Archive</button></div></div>`).join("")}`;}
+function renderAdminSettings(){return`
+  <div class="gn-settings-grid">
+    <div class="gn-settings-section">
+      <div class="gn-settings-section-title">Site Information</div>
+      ${Object.entries(state.settings).map(([k,v])=>`<div style="margin-bottom:1.35rem"><label class="gn-upload-label">${k}</label><input class="gn-upload-input" value="${v}" oninput="state.settings['${k}']=this.value"></div>`).join("")}
+      <button class="gn-admin-btn">Save Changes →</button>
+    </div>
+    <div class="gn-settings-section">
+      <div class="gn-settings-section-title">Admin Profile</div>
+      <div style="margin-bottom:1.35rem"><label class="gn-upload-label">Email</label><input class="gn-upload-input" value="${state.adminUser?.email||''}" style="opacity:.5" readonly></div>
+      <div style="margin-bottom:1.35rem"><label class="gn-upload-label">New Password</label><input type="password" class="gn-upload-input" placeholder="Leave blank to keep current"></div>
+      <button class="gn-admin-btn">Update Profile →</button>
+      <div class="gn-settings-section-title" style="margin-top:2rem">Social Media</div>
+      ${[["Instagram","@gnationcreatives"],["TikTok","@gnation"],["WhatsApp","+255700000000"]].map(([l,v])=>`<div style="margin-bottom:1.1rem"><label class="gn-upload-label">${l}</label><input class="gn-upload-input" value="${v}"></div>`).join("")}
+    </div>
+    <div style="grid-column:1/-1;border:1px solid rgba(255,107,107,.2);padding:1.75rem;background:rgba(255,107,107,.02)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.05em;color:#ff6b6b;margin-bottom:1rem">Firebase Configuration</div>
+      <p style="font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.15em;color:var(--muted);line-height:2;margin-bottom:1.25rem">Update FIREBASE_CONFIG in GNationCreatives.jsx with your credentials to enable real-time sync, Storage uploads, and Firestore messages.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+        ${["Authentication","Firestore DB","Storage"].map(f=>`<div style="padding:.65rem .85rem;border:1px solid rgba(255,107,107,.2);font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,107,107,.65)">○ ${f} · Not connected</div>`).join("")}
+      </div>
+    </div>
+  </div>`;}
+// ── EVENT HANDLERS ──
+function bindEvents(){
+  window.scrollToSection=id=>{document.getElementById(id)?.scrollIntoView({behavior:"smooth"});state.mobileMenuOpen=false;};
+  window.goAdmin=()=>{state.view=state.adminUser?"admin":"login";render();};
+  const menu=document.getElementById("gnav-menu");
+  if(menu){menu.classList.toggle("active",state.mobileMenuOpen);}
+  window.filterCat=cat=>{state.filterCat=cat;render();};
+  window.openLightbox=id=>{state.lightbox=id;render();};
+  window.closeLightbox=()=>{state.lightbox=null;render();};
+  window.closeLightboxBg=e=>{if(e.target===e.currentTarget){state.lightbox=null;render();}};
+  window.switchT=i=>{state.tIdx=i;const tt=document.getElementById("ttext"),ta=document.getElementById("tauthor");if(tt&&ta){tt.style.opacity="0";ta.style.opacity="0";setTimeout(()=>{state.tIdx=i;const t=TESTIMONIALS[i];tt.textContent=t.text;ta.textContent=`${t.author} — ${t.loc}`;tt.style.opacity="1";ta.style.opacity="1";document.querySelectorAll(".gn-dot").forEach((d,idx)=>d.classList.toggle("active",idx===i));},300);}};
+  window.setForm=(k,v)=>{state.formData[k]=v;};
+  window.submitForm=()=>{const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;if(!state.formData.name||state.formData.name.trim().length<2){alert("Please enter your full name");return;}if(!emailRegex.test(state.formData.email)){alert("Please enter a valid email address");return;}if(!state.formData.service){alert("Please select a service");return;}if(!state.formData.msg||state.formData.msg.trim().length<10){alert("Please describe your vision (at least 10 characters)");return;}state.messages.unshift({id:Date.now().toString(),...state.formData,msg:state.formData.msg,date:new Date().toISOString().split("T")[0]});state.formSent=true;state.formData={name:"",email:"",service:"",msg:""};render();setTimeout(()=>{state.formSent=false;render();},3000);};
+  window.doLogin=()=>{if(state.loginEmail==="admin@gnation.com"&&state.loginPass==="gnation2026"){state.adminUser={email:state.loginEmail,name:"GNATION Admin"};state.loginErr="";state.view="admin";render();}else{state.loginErr="Invalid credentials. Try admin@gnation.com / gnation2026";render();}};
+  window.doUpload=()=>{if(!state.uploadForm.title||!state.uploadForm.img)return;state.portfolio.unshift({id:Date.now().toString(),title:state.uploadForm.title,cat:state.uploadForm.cat,desc:state.uploadForm.desc,img:state.uploadForm.img,date:new Date().toISOString().split("T")[0]});state.uploadSuccess=true;state.uploadForm={title:"",cat:"Portrait",desc:"",img:""};render();setTimeout(()=>{state.uploadSuccess=false;},3000);};
+  window.deleteItem=id=>{if(confirm("Delete this project?")){state.portfolio=state.portfolio.filter(p=>p.id!==id);render();}};
+  // Nav scroll
+  const nav=document.getElementById("gnav");
+  if(nav){window.addEventListener("scroll",()=>{nav.classList.toggle("scrolled",window.scrollY>60);},{passive:true});}
+  // Testimonial auto-rotate
+  clearInterval(window._tInterval);
+  if(state.view==="site"){window._tInterval=setInterval(()=>switchT((state.tIdx+1)%TESTIMONIALS.length),6000);}
+}
+function initReveal(){
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible");});},{threshold:.08});
+  document.querySelectorAll(".reveal").forEach(el=>obs.observe(el));
+}
+// ── CURSOR ──
+const cur=document.getElementById("cursor"),ring=document.getElementById("ring");
+document.addEventListener("mousemove",e=>{cur.style.left=e.clientX+"px";cur.style.top=e.clientY+"px";setTimeout(()=>{ring.style.left=e.clientX+"px";ring.style.top=e.clientY+"px";},80);});
+document.addEventListener("mouseover",e=>{if(e.target.closest("a,button,[data-hover]")){cur.style.width="18px";cur.style.height="18px";ring.style.width="60px";ring.style.height="60px";}else{cur.style.width="10px";cur.style.height="10px";ring.style.width="38px";ring.style.height="38px";}});
+// ── LOADER ──
+setTimeout(()=>{document.getElementById("loader").classList.add("hidden");setTimeout(()=>{render();},600);},2200);
+</script>
+</body>
+</html>
