@@ -437,8 +437,8 @@ function renderLogin(){return`
     <div class="gn-login-brand">GNATION<span>.</span>ADMIN</div>
     <div class="gn-login-sub">Secure Dashboard Access</div>
     ${state.loginErr?`<div class="gn-login-err">${state.loginErr}</div>`:""}
-    <div class="gn-form-group"><label class="gn-upload-label">Email</label><input type="email" class="gn-upload-input" value="${state.loginEmail}" oninput="state.loginEmail=this.value" onkeydown="if(event.key==='Enter')doLogin()" placeholder="admin@gnation.com"></div>
-    <div class="gn-form-group" style="margin-top:1.25rem"><label class="gn-upload-label">Password</label><input type="password" class="gn-upload-input" value="${state.loginPass}" oninput="state.loginPass=this.value" onkeydown="if(event.key==='Enter')doLogin()" placeholder="gnation2026"></div>
+    <div class="gn-form-group"><label class="gn-upload-label">Email</label><input type="email" class="gn-upload-input" value="${state.loginEmail}" oninput="state.loginEmail=this.value" onkeydown="if(event.key==='Enter')doLogin()" placeholder=""></div>
+    <div class="gn-form-group" style="margin-top:1.25rem"><label class="gn-upload-label">Password</label><input type="password" class="gn-upload-input" value="${state.loginPass}" oninput="state.loginPass=this.value" onkeydown="if(event.key==='Enter')doLogin()" placeholder=""></div>
     <button class="gn-form-submit" style="margin-top:1.75rem;width:100%" onclick="doLogin()">Enter Dashboard →</button>
     <button style="margin-top:.85rem;background:none;border:none;font-family:'Space Mono',monospace;font-size:.44rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);cursor:none;width:100%;text-align:center" onclick="state.view='site';render()">← Back to Site</button>
     <div style="margin-top:1.5rem;font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.2em;color:rgba(107,98,88,.6);text-align:center">Demo: admin@gnation.com / gnation2026</div>
